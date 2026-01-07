@@ -1,63 +1,62 @@
 require('dotenv').config();
-import SpotifyWebApi from 'spotify-web-api-node';
-const Api = new SpotifyWebApi({
-    clientId: process.env.SPOTIFY_ID,
-    clientSecret: process.env.SPOTIFY_SECRET,
-    redirectUrl: process.env.SPOTIFY_URL
+import ipcRenderer from 'electron';
+
+async function callEndpoint(endpoint) {
+    try {
+        const res = await fetch('http://localhost:3000/${endpoint}');
+        if (res.headers.get('content-type')?.includes('application/json')) {
+            return await res.json();
+        }
+        return await res.text();
+    } catch (error) {
+        console.error('Error calling endpoint ${endpoint}:', error);
+        return null;
+    }
+}
+document.getElementById("playBtn").addEventListener("click", () => callEndpoint('play'));
+document.getElementById("pauseBtn").addEventListener("click", () => callEndpoint('pause'));
+document.getElementById("nextBtn").addEventListener("click", () => callEndpoint('next'));
+document.getElementById("prevBtn").addEventListener("click", () => callEndpoint('previous'));
+
+document.getElementById("volDownBtn").addEventListener("click", () => {
+    const newVol = Math.max(Number(document.getElementById("volumeBar").value) - 10, 0);
+    callEndpoint('volume/${newVol}');
+    document.getElementById("volumeBar").value = newVol;
+    document.getElementById("volLabel").textContent = `Volumen: ${newVol}%`;
 });
-
-function play() {
-    Api.play().then(() => {
-        console.log('Playback started');
-    }).catch(err => {
-        console.error('Error starting playback:', err);
-    });
+document.getElementById("volUpBtn").addEventListener("click", () => {
+    const newVol = Math.min(Number(document.getElementById("volumeBar").value) + 10, 100);
+    callEndpoint('volume/${newVol}');
+    document.getElementById("volumeBar").value = newVol;
+    document.getElementById("volLabel").textContent = `Volumen: ${newVol}%`;
+});
+document.getElementById("volumeBar").addEventListener("input", (e) => {
+    const newVol = e.target.value;
+    callEndpoint('volume/${newVol}');
+    document.getElementById("volLabel").textContent = `Volumen: ${newVol}%`;
+});
+function msToTime(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    return `${minutes}:${seconds.toString().padStart(2, '0')}`;
 }
+async function refreshStatus() {
+    const data = await callEndpoint('status');
+    if (!data) return;
 
-function pause() {
-    Api.pause().then(() => {
-        console.log('Playback paused');
-    }).catch(err => {
-        console.error('Error pausing playback:', err);
-    });
-}
+    document.getElementById("songTitle").textContent = data.title || 'No song playing';
+    document.getElementById("songArtist").textContent = data.artist || '';
+    document.getElementById("cover").textContent = data.album || '';
 
-function next() {
-    Api.skipToNext().then(() => {
-        console.log('Skipped to next track');
-    }).catch(err => {
-        console.error('Error skipping to next track:', err);
-    });
-}
+    const progress = data.durationMs ? Math.floor(((data.progressMs || 0) / data.durationMs) * 100) : 0;
+    document.getElementById("progressBar").value = progress;
+    document.getElementById("timeLabel").textContent = `${msToTime(data.progressMs || 0)} / ${msToTime(data.durationMs || 0)}`;
 
-function previous() {
-    Api.skipToPrevious().then(() => {
-        console.log('Skipped to previous track');
-    }).catch(err => {
-        console.error('Error skipping to previous track:', err);
-    });
+    document.getElementById("volumeBar").value = data.volume || 50;
+    document.getElementById("volLabel").textContent = `Volume: ${data.volume || 50}%`; 
 }
+setInterval(refreshStatus, 2000);
+refreshStatus();
 
-function VolumeUp() {
-    Api.getMyCurrentPlaybackState().then(data => {
-        let currentVolume = data.body.device.volume_percent;
-        let newVolume = Math.min(currentVolume + 10, 100);
-        return Api.setVolume(newVolume);
-    }).then(() => {
-        console.log('Volume increased');
-    }).catch(err => {
-        console.error('Error increasing volume:', err);
-    });
-}
 
-function VolumeDown() {
-    Api.getMyCurrentPlaybackState().then(data => {
-        let currentVolume = data.body.device.volume_percent;
-        let newVolume = Math.max(currentVolume - 10, 0);
-        return Api.setVolume(newVolume);
-    }).then(() => {
-        console.log('Volume decreased');
-    }).catch(err => {
-        console.error('Error decreasing volume:', err);
-    });
-}

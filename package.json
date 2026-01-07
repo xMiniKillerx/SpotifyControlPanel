@@ -1,5 +1,14 @@
 {
+  "name": "spotify-control-panel",
+  "version": "1.0.0",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
   "dependencies": {
     "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "electron": "^31.0.0"
   }
 }

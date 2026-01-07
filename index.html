@@ -1,15 +1,108 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Spotify</title>
+        <meta charset="UTF-8"/>
+        <title>Spotify Control Panel</title>
+        <style>
+            body {
+                font-family: system-ui, Arial;
+                margin: 16px;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+                gap: 10px;
+                background-color: #121212;
+                color: #fff;
+            }
+            .cover {
+                width: 320px;
+                height: 320px;
+                background: #fff;
+                object-fit: cover;
+                border-radius: 8px;
+                box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            }
+            .title { 
+                font-weight: 600; 
+                margin: 12px 0 4px;
+            }
+            .artist {
+                color: #bbb;
+                margin: 0 0 12px;
+            }
+            .row {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+            .controls {
+                display: flex;
+                gap: 12px;
+                margin: 12px 0;
+            }
+            button {
+                padding: 8px 12px;
+                border: none;
+                border-radius: 6px;
+                background-color: #14833b;
+                color: white;
+                cursor: pointer;
+                font-weight: 600;
+            }
+            button:hover {
+                background-color: #1ed760;
+            }
+            button:active {
+                background-color: #1DB954;
+            }
+            button.secondary {
+                background-color: #333;
+                color: #eee;
+            }
+            input[type="range"] {
+                width: 100%;
+            }
+            .meta{
+                font-size: 12px;
+                color: #999;
+            }
+            .topbar {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 12px;
+            }
+        </style>
     </head>
     <body>
-        <button oneclick="play()">▶️</button>
-        <button oneclick="pause()">⏸️</button>
-        <button oneclick="next()">⏭️</button>
-        <button oneclick="previous()">⏮️</button>
-        <button oneclick="VolumeDown()">​➖​</button>
-        <button oneclick="VolumeUp()">​➕</button>
+        <div class="topbar">
+            <button id="authBtn">Conectar</button>
+            <span id="deviceLabel" class="meta">Dispositivo:</span>
+        </div>
+
+        <img id="cover" class="cover" src="" alt="cover"/>
+        <div class ="title" id="title">Titulo</div>
+        <div class ="artist" id="artist">Artista</div>
+
+        <div class="row">
+            <input id="progressBar" type="range" min="0" max="100" value="0">
+            <span id="timeLabel" class="meta">0:00 / 0:00</span>
+        </div>
+
+        <div class="controls">
+            <button id="playBtn">▶️</button>
+            <button id="pauseBtn" class="secondary">⏸️</button>
+            <button id="nextBtn">⏭️</button>
+            <button id="prevBtn">⏮️</button>
+        </div>
+
+        <div class="row">
+            <button id="volDownBtn" class="secondary">​➖​</button>
+            <input id="volumeBar" type="range" min="0" max="100" value="50">
+            <button id="volUpBtn">​➕</button>
+            <span id="volLabel" class="meta">Volumen: 50%</span>
+        </div>
         <script src="app.js"></script>
     </body>
 </html>
